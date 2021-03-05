@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>pcr角色最爱礼物查询</title>
+  <style>
+  	body{font-size: 16px;text-align:center;}
+  	input,button{padding: 5px 10px;}
+  	dt{background: pink;}
+  	dd{margin: 0;text-align: left;}
+  	.name{display: inline-block;width: 33.3%;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;}
+  </style>
+</head>
+
+<body>
+	<div>
+		<h4>最爱礼物查询</h4>
+		<div>
+			<input type="text" id="input" placeholder="输入她的名字" />
+			<button id="run">查询</button>
+		</div>
+		<div id="res"></div>
+		<div id="list"></div>
+	</div>
+	<script src="roles.js"></script>
+  <script>
+  	var gifts = ["玩偶", "礼服", "歌剧门票", "水晶球", "耳环", "发饰", "小裙子", "热牛奶", "书", "鲜花"];
+  	let input = document.getElementById('input');
+  	let btn = document.getElementById('run');
+  	let res = document.getElementById('res');
+  	let list = document.getElementById('list');
+  	const search = throttle(_search,200);
+  	renderAll();
+
+
+
+  	function renderAll(){
+  		let giftsList = (function(){
+  			let obj = {};
+  			for (var i = 0; i < gifts.length; i++) {
+  				obj[i] = {
+  					id: i,
+  					name: gifts[i],
+  					data: []
+  				}
+  			}
+  			return obj;
+  		})();
+
+  		var keys = Object.keys(roles);
+  		var length = keys.length;
+  		for (var i = 0; i < length; i++) {
+  			let id = keys[i];
+  			let name = roles[id][0];
+  			giftsList[id % 10].data.push('<span class="name">'+name+'</span>');
+  		}
+
+  		list.innerHTML = (function(){
+	  		var code = '';
+	  		var keys = Object.keys(giftsList);
+	  		for (var i = 0; i < keys.length; i++) {
+	  			let item = giftsList[keys[i]];
+	  			code += '<dl><dt>'+item.name+'</dt><dd>'+item.data.join('')+'</dd></dl>';
+	  		}
+	  		return code;
+  		})();
+  	}
+
+  	function getRoleId(text){
+  		var keys = Object.keys(roles);
+  		var length = keys.length;
+  		for (var i = 0; i < length; i++) {
+  			let data = roles[keys[i]];
+  			for (var j = 0; j < data.length; j++) {
+  				if(data[j] == text){
+  					return keys[i];
+  				}
+  			}
+  		}
+  		return 0;
+  	}
+
+  	function renderRes(html){
+  		res.innerHTML = html;
+  	}
+
+  	function _search(){
+  		console.log(1)
+  		var name = input.value;
+  		name = name.trim();
+  		var roleId = getRoleId(name);
+  		if(!roleId){
+  			renderRes('');
+  			return;
+  		}else{
+  			renderRes(name+'最喜欢的礼物是：'+'<div>'+gifts[(roleId%10)]+'</div>');
+  		}
+  	}
+
+  	btn.onclick = search;
+  	input.onfocus = function(){
+  		input.value = '';
+  		renderRes('');
+  	}
+  	input.onkeyup = function() {
+  		search();
+      // if(window.event.keyCode == 13) {
+          
+      // }
+    }
+
+    function throttle(fn,wait){
+      var timer = null;
+      return function(){
+          var context = this;
+          var args = arguments;
+          if(!timer){
+              timer = setTimeout(function(){
+                  fn.apply(context,args);
+                  timer = null;
+              },wait)
+          }
+      }
+    }
+  </script>
+</body>
+
+</html>
